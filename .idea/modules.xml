@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BaiduAI.iml" filepath="$PROJECT_DIR$/.idea/modules/BaiduAI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/BaiduAI.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/BaiduAI.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/BaiduAI.core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/BaiduAI.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uiasr/BaiduAI.uiasr.iml" filepath="$PROJECT_DIR$/.idea/modules/uiasr/BaiduAI.uiasr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uidialog/BaiduAI.uidialog.iml" filepath="$PROJECT_DIR$/.idea/modules/uidialog/BaiduAI.uidialog.iml" />
+    </modules>
+  </component>
+</project>
