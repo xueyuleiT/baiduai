@@ -29,6 +29,7 @@ import com.baidu.aip.asrwakeup3.uiasr.params.OfflineRecogParams;
 import com.baidu.aip.asrwakeup3.util.Auth;
 import com.baidu.aip.asrwakeup3.util.ChineseNumberUtil;
 import com.baidu.aip.asrwakeup3.util.IOfflineResourceConst;
+import com.baidu.aip.asrwakeup3.util.Number2EnglishUtil;
 import com.baidu.aip.asrwakeup3.util.OfflineResource;
 import com.baidu.speech.asr.SpeechConstant;
 import com.baidu.tts.chainofresponsibility.logger.LoggerProxy;
@@ -38,8 +39,6 @@ import com.baidu.tts.client.TtsMode;
 import com.hjq.permissions.OnPermission;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -342,8 +341,15 @@ public class ActivityAiUiRecog extends ActivityAi implements IStatus {
         params.put(SpeechSynthesizer.PARAM_PITCH, "5");
         // 在线SDK版本没有此参数。
 
+        OfflineResource offlineResource;
         // 离线资源文件， 从assets目录中复制到临时目录，需要在initTTs方法前完成
-        OfflineResource offlineResource = createOfflineResource(VOICE_FEMALE);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ActivityAiUiRecog.this);
+        if (!sp.getString(SpeechConstant.PID,"").equals("1637")) {//粤语
+            offlineResource = createOfflineResource(VOICE_FEMALE);
+        } else {
+            offlineResource = createOfflineResource(VOICE_FEMALE);
+        }
+
         params.put(SpeechSynthesizer.PARAM_TTS_TEXT_MODEL_FILE, offlineResource.getTextFilename());
         params.put(SpeechSynthesizer.PARAM_TTS_SPEECH_MODEL_FILE, offlineResource.getModelFilename());
         return params;
@@ -444,7 +450,7 @@ public class ActivityAiUiRecog extends ActivityAi implements IStatus {
                 Log.d(TAG  + "6",msg.toString());
                if (msg.what == 6 && msg.arg1 == 6) {
                    if (msg.arg2 == 1) {
-                       View view = getCurrentFocus();
+                       final View view = getCurrentFocus();
                        if (view instanceof EditText) {
                            String result = msg.obj.toString().split("；")[0];
                            if (result.contains("asr.finish")) {
@@ -452,6 +458,19 @@ public class ActivityAiUiRecog extends ActivityAi implements IStatus {
                            }
 
                            int index = getIndex(view);
+                           if (result.contains("重新输入") || result.contains("从新输入")) {
+                               if (index == 0) {
+                                   ((EditText) view).setText("");
+                                   speak(uiDataList.get(index).speakStr,Math.max((uiDataList.get(index).speakStr.length() / 3) * 2000,1000));
+                                   return;
+                               } else {
+                                   EditText preView = uiDataList.get(index - 1).edit;
+                                   preView.setText("");
+                                   preView.requestFocus();
+//                                   speak(uiDataList.get(index-1).speakStr,Math.max((uiDataList.get(index-1).speakStr.length() / 3) * 2000,1000));
+                               }
+                               return;
+                           }
                            if (result.contains("上一个") || result.contains("上一格")
                                    || result.contains("上一项")
                                    || result.contains("上一条")
@@ -489,11 +508,49 @@ public class ActivityAiUiRecog extends ActivityAi implements IStatus {
                            result = result.replaceAll("。", "");
 
                            if (uiDataList.get(index).isNumber) {
-                               result = ChineseNumberUtil.convertString(result.replaceAll("。", ""));
+                               SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ActivityAiUiRecog.this);
+                                String speakStr = "";
+                               if (sp.getString(SpeechConstant.PID,"").equals("1737")) {
+                                   result = ChineseNumberUtil.convertEnglishString(result.replaceAll("。", ""));
+                                   speakStr = Number2EnglishUtil.num2English(result);
+                               } else {
+                                   result = ChineseNumberUtil.convertString(result.replaceAll("。", ""));
+                                   speakStr = result;
+
+                               }
                                if (!ChineseNumberUtil.isNumber(result)) {
                                    speak("输入错误，请重新输入", 3000);
                                    return;
                                }
+                               stop();
+                               btnStart.setEnabled(false);
+                               synthesizer.speak(speakStr);
+                               Log.d("speak",speakStr);
+                               ((EditText) view).setText(result);
+                               handler.postDelayed(new Runnable() {
+                                   @Override
+                                   public void run() {
+//                                       start();
+//                                       status = STATUS_WAITING_READY;
+//                                       updateBtnTextByStatus();
+
+                                        int index = getIndex(view);
+                                       if (index == uiDataList.size() - 1) {
+                                           index = 0;
+                                       } else {
+                                           index ++;
+                                       }
+                                       final int finalIndex = index;
+                                       handler.postDelayed(new Runnable() {
+                                           @Override
+                                           public void run() {
+                                               uiDataList.get(finalIndex).edit.requestFocus();
+                                           }
+                                       },500);
+                                   }
+                               },Math.max((speakStr.length() / 3) * 2000,1000));
+
+                                return;
                            }
 
                            ((EditText) view).setText(result);
@@ -529,9 +586,7 @@ public class ActivityAiUiRecog extends ActivityAi implements IStatus {
         stop();
         status = STATUS_NONE; // 引擎识别中
         btnStart.setEnabled(false);
-
         synthesizer.speak(s);
-
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {

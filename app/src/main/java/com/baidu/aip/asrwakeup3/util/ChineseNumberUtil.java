@@ -6,8 +6,101 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class ChineseNumberUtil {
+
+    public static String convertEnglishString(String numberStr) {
+        /**
+         * negative, zero, one, two, three, four, five, six, seven,
+         * eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen,
+         *  sixteen, seventeen, eighteen, nineteen, twenty, thirty, forty, fifty,
+         *  sixty, seventy, eighty, ninety, hundred, thousand, million
+         */
+        Map map = new HashMap();
+        map.put("negative", -1);
+        map.put("zero", 0);
+        map.put("point", -2);
+        map.put("one", 1);
+        map.put("two", 2);
+        map.put("three", 3);
+        map.put("four", 4);
+        map.put("five", 5);
+        map.put("six", 6);
+        map.put("seven", 7);
+        map.put("eight", 8);
+        map.put("nine", 9);
+        map.put("ten", 10);
+        map.put("eleven", 11);
+        map.put("twelve", 12);
+        map.put("thirteen", 13);
+        map.put("fourteen", 14);
+        map.put("fifteen", 15);
+        map.put("sixteen", 16);
+        map.put("seventeen", 17);
+        map.put("eighteen", 18);
+        map.put("nineteen", 19);
+        map.put("twenty", 20);
+        map.put("thirty", 30);
+        map.put("forty", 40);
+        map.put("fifty", 50);
+        map.put("sixty", 60);
+        map.put("seventy", 70);
+        map.put("eighty", 80);
+        map.put("ninety", 90);
+        map.put("hundred", 100);
+        map.put("thousand", 1000);
+        map.put("million", 1000000);
+
+
+            int sum = 0;//总数
+            int acc = 0;//累加到某一步的数
+
+            int flag = 1;
+            String str1 = numberStr;
+
+            str1 = str1.trim();
+            if(str1.length()==0){
+                return str1;
+            }
+            String[] strs = str1.split(" ");
+
+            String result = "";
+
+            for(String str : strs){
+                if(str.equals("hundred")){
+                    sum += acc* (Integer)map.get(str);
+                    acc = 0;
+                }else if(str.equals("negative")){
+                    flag = -1;
+                    acc = 0;
+                }else if(str.equals("thousand") || str.equals("million")){
+                    sum += acc*((Integer)map.get(str));
+                    acc = 0;
+                } else if(str.equals("point")) {
+                    sum += acc;
+                    result = sum + ".";
+                    acc = 0;
+                }else {
+                    if (map.get(str) != null){
+                        acc = (Integer)map.get(str);
+                        if (acc >= 10) {
+                            sum += acc;
+                            acc = 0;
+                        }
+                        if (result.contains(".")) {
+                            result += acc;
+                        }
+                    }
+                }
+            }
+
+        if (result.contains(".")) {
+            return result;
+        }
+
+        return String.valueOf(sum + acc);
+    }
 
     public static String convertString(String string) {
         StringBuilder builder = new StringBuilder();

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.yy.ai" //com.zh.ai
+        applicationId "com.zh.ai" //com.zh.ai com.yy.ai
         minSdkVersion 16
         targetSdkVersion 28
     }
